@@ -1,4 +1,3 @@
-
 import { AuthResponse, Booking, Hotel, User } from '@/types';
 import { toast } from 'sonner';
 
@@ -259,10 +258,11 @@ export const getBookings = async (): Promise<Booking[]> => {
       throw new Error('Failed to fetch bookings');
     }
     
-    return await response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   } catch (error: any) {
     handleApiError(error);
-    throw error;
+    return [];
   }
 };
 

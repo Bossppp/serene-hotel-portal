@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Navbar from '@/components/layout/Navbar';
@@ -21,9 +20,10 @@ export default function Dashboard() {
     const fetchBookings = async () => {
       try {
         const data = await getBookings();
-        setBookings(data);
+        setBookings(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
+        setBookings([]);
       } finally {
         setLoading(false);
       }
@@ -33,28 +33,30 @@ export default function Dashboard() {
   }, []);
   
   const handleBookingDelete = () => {
-    // Refresh bookings after deletion
     getBookings()
-      .then(data => setBookings(data))
-      .catch(error => console.error('Failed to refresh bookings:', error));
+      .then(data => setBookings(Array.isArray(data) ? data : []))
+      .catch(error => {
+        console.error('Failed to refresh bookings:', error);
+        setBookings([]);
+      });
   };
   
-  const upcomingBookings = bookings.filter(
+  const upcomingBookings = Array.isArray(bookings) ? bookings.filter(
     booking => new Date(booking.start_date) > new Date()
-  );
+  ) : [];
   
-  const activeBookings = bookings.filter(
+  const activeBookings = Array.isArray(bookings) ? bookings.filter(
     booking => {
       const now = new Date();
       const start = new Date(booking.start_date);
       const end = new Date(booking.end_date);
       return now >= start && now <= end;
     }
-  );
+  ) : [];
   
-  const pastBookings = bookings.filter(
+  const pastBookings = Array.isArray(bookings) ? bookings.filter(
     booking => new Date(booking.end_date) < new Date()
-  );
+  ) : [];
   
   return (
     <ProtectedRoute>
@@ -63,7 +65,6 @@ export default function Dashboard() {
         
         <main className="flex-1 py-16 bg-muted/30 animate-fade-in">
           <div className="container px-4 pt-8">
-            {/* Dashboard Header */}
             <div className="mb-8">
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <p className="text-muted-foreground mt-2">
@@ -71,7 +72,6 @@ export default function Dashboard() {
               </p>
             </div>
             
-            {/* Dashboard Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <Card>
                 <CardHeader className="pb-2">
@@ -173,9 +173,7 @@ export default function Dashboard() {
               </Card>
             </div>
             
-            {/* Bookings */}
             <div className="space-y-8">
-              {/* Active Bookings */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Active Bookings</h2>
@@ -218,7 +216,6 @@ export default function Dashboard() {
                 )}
               </div>
               
-              {/* Upcoming Bookings */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Upcoming Bookings</h2>
@@ -267,7 +264,6 @@ export default function Dashboard() {
                 )}
               </div>
               
-              {/* Past Bookings */}
               {pastBookings.length > 0 && (
                 <div>
                   <div className="flex justify-between items-center mb-4">
