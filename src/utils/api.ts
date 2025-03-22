@@ -137,10 +137,12 @@ export const getHotels = async (): Promise<Hotel[]> => {
       throw new Error('Failed to fetch hotels');
     }
     
-    return await response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   } catch (error: any) {
     handleApiError(error);
-    throw error;
+    console.error('Error fetching hotels:', error);
+    return [];
   }
 };
 

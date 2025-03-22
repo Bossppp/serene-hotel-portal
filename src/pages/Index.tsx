@@ -17,9 +17,13 @@ export default function Index() {
     const fetchHotels = async () => {
       try {
         const hotels = await getHotels();
-        setPopularHotels(hotels.slice(0, 3));
+        // Ensure hotels is an array before calling slice
+        const hotelArray = Array.isArray(hotels) ? hotels : [];
+        setPopularHotels(hotelArray.slice(0, 3));
+        console.log('Fetched hotels:', hotels);
       } catch (error) {
         console.error('Failed to fetch hotels:', error);
+        setPopularHotels([]);
       } finally {
         setLoading(false);
       }
