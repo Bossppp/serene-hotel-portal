@@ -1,7 +1,11 @@
 import { AuthResponse, Booking, Hotel, User } from '@/types';
 import { toast } from 'sonner';
+import { mockUsers, mockHotels, mockBookings } from './mockData';
 
 const API_URL = 'http://localhost:5003/api/v9';
+
+// Flag to use mock data instead of real API
+const USE_MOCK_DATA = true;
 
 // Helper to handle API errors
 const handleApiError = (error: any) => {
@@ -12,6 +16,24 @@ const handleApiError = (error: any) => {
 
 // Auth API calls
 export const registerUser = async (userData: Omit<User, 'role' | 'id'>): Promise<AuthResponse> => {
+  if (USE_MOCK_DATA) {
+    // Mock registration
+    const newUser = {
+      ...userData,
+      id: `mock-${Date.now()}`,
+      role: 'user' as const
+    };
+    
+    // Create mock token
+    const token = `mock-token-${Date.now()}`;
+    localStorage.setItem('token', token);
+    
+    return {
+      user: newUser,
+      token
+    };
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
@@ -34,6 +56,25 @@ export const registerUser = async (userData: Omit<User, 'role' | 'id'>): Promise
 };
 
 export const loginUser = async (email: string, password: string): Promise<AuthResponse> => {
+  if (USE_MOCK_DATA) {
+    // Find user by email
+    const user = mockUsers.find(u => u.email === email);
+    
+    if (!user) {
+      toast.error('Invalid credentials');
+      throw new Error('Invalid credentials');
+    }
+    
+    // Create mock token
+    const token = `mock-token-${Date.now()}`;
+    localStorage.setItem('token', token);
+    
+    return {
+      user,
+      token
+    };
+  }
+
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -56,6 +97,17 @@ export const loginUser = async (email: string, password: string): Promise<AuthRe
 };
 
 export const getMe = async (): Promise<User> => {
+  if (USE_MOCK_DATA) {
+    // Return the first mock user as the logged-in user
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
+    return mockUsers[0];
+  }
+
   try {
     const token = localStorage.getItem('token');
     
@@ -81,6 +133,11 @@ export const getMe = async (): Promise<User> => {
 };
 
 export const logoutUser = async (): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    localStorage.removeItem('token');
+    return;
+  }
+
   try {
     const token = localStorage.getItem('token');
     
@@ -101,6 +158,20 @@ export const logoutUser = async (): Promise<void> => {
 };
 
 export const updateUser = async (userData: Partial<User>): Promise<User> => {
+  if (USE_MOCK_DATA) {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
+    // Return updated user data
+    return {
+      ...mockUsers[0],
+      ...userData
+    };
+  }
+
   try {
     const token = localStorage.getItem('token');
     
@@ -130,6 +201,12 @@ export const updateUser = async (userData: Partial<User>): Promise<User> => {
 
 // Hotel API calls
 export const getHotels = async (): Promise<Hotel[]> => {
+  if (USE_MOCK_DATA) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [...mockHotels];
+  }
+
   try {
     const response = await fetch(`${API_URL}/hotels`);
     
@@ -147,6 +224,17 @@ export const getHotels = async (): Promise<Hotel[]> => {
 };
 
 export const getHotel = async (id: string): Promise<Hotel> => {
+  if (USE_MOCK_DATA) {
+    // Find hotel by ID
+    const hotel = mockHotels.find(h => h.id === id);
+    
+    if (!hotel) {
+      throw new Error('Hotel not found');
+    }
+    
+    return hotel;
+  }
+
   try {
     const response = await fetch(`${API_URL}/hotels/${id}`);
     
@@ -162,13 +250,17 @@ export const getHotel = async (id: string): Promise<Hotel> => {
 };
 
 export const createHotel = async (hotelData: Omit<Hotel, 'id'>): Promise<Hotel> => {
+  if (USE_MOCK_DATA) {
+    // Create a new hotel with a mock ID
+    const newHotel = {
+      ...hotelData,
+      id: `mock-hotel-${Date.now()}`
+    };
+    
+    return newHotel;
+  }
+
   try {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-    
     const response = await fetch(`${API_URL}/hotels`, {
       method: 'POST',
       headers: {
@@ -190,13 +282,22 @@ export const createHotel = async (hotelData: Omit<Hotel, 'id'>): Promise<Hotel> 
 };
 
 export const updateHotel = async (id: string, hotelData: Partial<Hotel>): Promise<Hotel> => {
-  try {
-    const token = localStorage.getItem('token');
+  if (USE_MOCK_DATA) {
+    // Find hotel by ID
+    const hotel = mockHotels.find(h => h.id === id);
     
-    if (!token) {
-      throw new Error('Not authenticated');
+    if (!hotel) {
+      throw new Error('Hotel not found');
     }
     
+    // Return updated hotel data
+    return {
+      ...hotel,
+      ...hotelData
+    };
+  }
+
+  try {
     const response = await fetch(`${API_URL}/hotels/${id}`, {
       method: 'PUT',
       headers: {
@@ -218,13 +319,12 @@ export const updateHotel = async (id: string, hotelData: Partial<Hotel>): Promis
 };
 
 export const deleteHotel = async (id: string): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    // In a real implementation, you would remove the hotel from the array
+    return;
+  }
+
   try {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-    
     const response = await fetch(`${API_URL}/hotels/${id}`, {
       method: 'DELETE',
       headers: {
@@ -243,6 +343,12 @@ export const deleteHotel = async (id: string): Promise<void> => {
 
 // Booking API calls
 export const getBookings = async (): Promise<Booking[]> => {
+  if (USE_MOCK_DATA) {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [...mockBookings];
+  }
+
   try {
     const token = localStorage.getItem('token');
     
@@ -269,6 +375,17 @@ export const getBookings = async (): Promise<Booking[]> => {
 };
 
 export const getBooking = async (id: string): Promise<Booking> => {
+  if (USE_MOCK_DATA) {
+    // Find booking by ID
+    const booking = mockBookings.find(b => b.id === id);
+    
+    if (!booking) {
+      throw new Error('Booking not found');
+    }
+    
+    return booking;
+  }
+
   try {
     const token = localStorage.getItem('token');
     
@@ -298,13 +415,28 @@ export const createBooking = async (bookingData: {
   start_date: string;
   end_date: string;
 }): Promise<Booking> => {
-  try {
-    const token = localStorage.getItem('token');
+  if (USE_MOCK_DATA) {
+    // Find hotel by ID
+    const hotel = mockHotels.find(h => h.id === bookingData.hotel_id);
     
-    if (!token) {
-      throw new Error('Not authenticated');
+    if (!hotel) {
+      throw new Error('Hotel not found');
     }
     
+    // Create a new booking with mock data
+    const newBooking: Booking = {
+      id: `mock-booking-${Date.now()}`,
+      start_date: bookingData.start_date,
+      end_date: bookingData.end_date,
+      hotel: hotel,
+      user: mockUsers[0], // Use the first mock user
+      createdAt: new Date().toISOString()
+    };
+    
+    return newBooking;
+  }
+
+  try {
     const response = await fetch(`${API_URL}/bookings`, {
       method: 'POST',
       headers: {
@@ -329,13 +461,22 @@ export const updateBooking = async (
   id: string, 
   bookingData: { start_date?: string; end_date?: string }
 ): Promise<Booking> => {
-  try {
-    const token = localStorage.getItem('token');
+  if (USE_MOCK_DATA) {
+    // Find booking by ID
+    const booking = mockBookings.find(b => b.id === id);
     
-    if (!token) {
-      throw new Error('Not authenticated');
+    if (!booking) {
+      throw new Error('Booking not found');
     }
     
+    // Return updated booking data
+    return {
+      ...booking,
+      ...bookingData
+    };
+  }
+
+  try {
     const response = await fetch(`${API_URL}/bookings/${id}`, {
       method: 'PUT',
       headers: {
@@ -357,13 +498,12 @@ export const updateBooking = async (
 };
 
 export const deleteBooking = async (id: string): Promise<void> => {
+  if (USE_MOCK_DATA) {
+    // In a real implementation, you would remove the booking from the array
+    return;
+  }
+
   try {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-      throw new Error('Not authenticated');
-    }
-    
     const response = await fetch(`${API_URL}/bookings/${id}`, {
       method: 'DELETE',
       headers: {
@@ -381,6 +521,12 @@ export const deleteBooking = async (id: string): Promise<void> => {
 };
 
 export const getHotelBookings = async (hotelId: string): Promise<Booking[]> => {
+  if (USE_MOCK_DATA) {
+    // Filter bookings by hotel ID
+    const bookings = mockBookings.filter(b => b.hotel.id === hotelId);
+    return bookings;
+  }
+
   try {
     const token = localStorage.getItem('token');
     
