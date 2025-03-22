@@ -1,7 +1,7 @@
 import { AuthResponse, Booking, Hotel, User } from '@/types';
 import { toast } from 'sonner';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'http://localhost:5003/api/v9';
 
 // Helper to handle API errors
 const handleApiError = (error: any) => {
