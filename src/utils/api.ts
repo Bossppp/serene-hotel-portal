@@ -1,3 +1,4 @@
+
 import { AuthResponse, Booking, Hotel, User } from '@/types';
 import { toast } from 'sonner';
 import { mockUsers, mockHotels, mockBookings } from './mockData';
@@ -261,6 +262,12 @@ export const createHotel = async (hotelData: Omit<Hotel, 'id'>): Promise<Hotel> 
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/hotels`, {
       method: 'POST',
       headers: {
@@ -298,6 +305,12 @@ export const updateHotel = async (id: string, hotelData: Partial<Hotel>): Promis
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/hotels/${id}`, {
       method: 'PUT',
       headers: {
@@ -325,6 +338,12 @@ export const deleteHotel = async (id: string): Promise<void> => {
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/hotels/${id}`, {
       method: 'DELETE',
       headers: {
@@ -437,6 +456,12 @@ export const createBooking = async (bookingData: {
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/bookings`, {
       method: 'POST',
       headers: {
@@ -477,6 +502,12 @@ export const updateBooking = async (
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/bookings/${id}`, {
       method: 'PUT',
       headers: {
@@ -504,6 +535,12 @@ export const deleteBooking = async (id: string): Promise<void> => {
   }
 
   try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      throw new Error('Not authenticated');
+    }
+    
     const response = await fetch(`${API_URL}/bookings/${id}`, {
       method: 'DELETE',
       headers: {
