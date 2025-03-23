@@ -43,7 +43,7 @@ const HomePage: React.FC = () => {
                   <div className="p-6">
                     <h3 className="text-xl font-semibold mb-2">{hotel.name}</h3>
                     <p className="text-gray-600 mb-4">
-                      {hotel.address.street}, {hotel.address.district}, {hotel.address.province} {hotel.address.postalcode}
+                      {hotel.address.street}, {hotel.address.district}, {hotel.address.province} {hotel.address.postal_code}
                     </p>
                     <Button 
                       onClick={() => router.push(`/hotels/${hotel.id}`)}
